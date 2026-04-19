@@ -1,3 +1,15 @@
+# Playground
+
+A little monorepo of small, original, open-source tools. Each subproject
+ships independently and is documented in its own README.
+
+| Project | Language | What it does |
+| --- | --- | --- |
+| [`regex-garden`](#regex-garden) (at the repo root under `src/`) | Python 3.10+ | Renders a regex as an ASCII plant whose shape mirrors its AST. |
+| [`censor/`](censor/README.md) | Rust | Stream-through redactor for secrets in logs, diffs, and shell output. Runs on Linux, macOS, and Windows. |
+
+---
+
 # regex-garden
 
 Grow ASCII plants from regular expressions.

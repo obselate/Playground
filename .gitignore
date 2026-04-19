@@ -6,3 +6,7 @@ __pycache__/
 .coverage
 dist/
 build/
+
+# Rust
+target/
+Cargo.lock.bak
