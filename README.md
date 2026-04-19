@@ -11,6 +11,7 @@ independently.
 | --- | --- | --- |
 | [`regex-garden/`](regex-garden/README.md) | Python 3.10+ | Grows each regex into a unique ASCII plant whose shape mirrors its AST. CLI + `.garden` file format. |
 | [`censor/`](censor/README.md) | Rust (edition 2021) | Stream-through redactor for secrets in logs, diffs, and shell output. Zero OS-specific code; ships as a single binary on Linux, macOS, and Windows. |
+| [`mile-marker/`](mile-marker/README.md) | Rust (edition 2021) | Native GUI (egui) for "record-and-narrate-as-you-go" screen capture: auto-pause-for-caption mechanic, exports a slideshow GIF or a Markdown walkthrough. |
 
 ## Layout
 
@@ -26,10 +27,17 @@ independently.
 │   ├── src/regex_garden/
 │   ├── tests/
 │   └── examples/
-└── censor/
+├── censor/
+│   ├── README.md
+│   ├── Cargo.toml
+│   ├── Cargo.lock
+│   ├── src/
+│   └── tests/
+└── mile-marker/
     ├── README.md
     ├── Cargo.toml
     ├── Cargo.lock
+    ├── assets/         # bundled font for caption overlays
     ├── src/
     └── tests/
 ```
@@ -38,6 +46,7 @@ Each subproject is the root of its own build:
 
 - **regex-garden**: `cd regex-garden && python -m pytest` (tests), `pip install -e .` (install), `python -m regex_garden examples` (demo).
 - **censor**: `cd censor && cargo test` (tests), `cargo install --path .` (install), `cargo run -- --list-patterns` (sanity check).
+- **mile-marker**: `cd mile-marker && cargo test` (tests), `cargo install --path .` (install), `cargo run --release` (launch the GUI).
 
 ## CI
 

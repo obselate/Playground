@@ -1,0 +1,45 @@
+[package]
+name = "mile-marker"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Record your screen with auto-pause-for-caption: produces a slideshow GIF or annotated Markdown walkthrough."
+license = "MIT"
+repository = "https://github.com/obselate/Playground"
+readme = "README.md"
+keywords = ["screen-capture", "screenshots", "tutorial", "gif", "gui"]
+categories = ["multimedia::images", "command-line-utilities", "gui"]
+
+[lib]
+name = "mile_marker"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mile-marker"
+path = "src/main.rs"
+
+[dependencies]
+ab_glyph = "0.2"
+anyhow = "1"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+eframe = { version = "0.28", default-features = false, features = [
+    "default_fonts",
+    "glow",
+    "wayland",
+    "x11",
+] }
+egui_extras = { version = "0.28", features = ["image"] }
+gif = "0.13"
+image = { version = "0.25", default-features = false, features = ["png"] }
+imageproc = { version = "0.25", default-features = false }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+xcap = "0.0.13"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
