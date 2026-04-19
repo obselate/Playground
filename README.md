@@ -54,6 +54,29 @@ GitHub Actions runs one workflow per project, each scoped by a path
 filter so a change to Python code doesn't rebuild Rust and vice versa.
 See `.github/workflows/`.
 
+## Releases
+
+Each project releases independently on its own tag pattern. Pushing
+the tag triggers a matching `release-*.yml` workflow that builds
+distribution artifacts and attaches them to a GitHub Release.
+
+| Project | Tag | Artifacts |
+| --- | --- | --- |
+| regex-garden | `regex-garden-v<semver>` | source tarball + pure-Python wheel |
+| censor | `censor-v<semver>` | release binaries for Linux x86_64, macOS x86_64, macOS aarch64, Windows x86_64 |
+| mile-marker | `mile-marker-v<semver>` | release binaries for the same four targets, plus bundled font notice |
+
+Example:
+
+```
+git tag censor-v0.2.0
+git push origin censor-v0.2.0
+```
+
+Release notes are auto-generated from commits since the previous tag.
+Rust binaries are stripped, LTO-thin, codegen-units=1 (all set in each
+project's `Cargo.toml` `[profile.release]`).
+
 ## Adding a new project
 
 1. Create a new top-level directory with its own README, build file, and

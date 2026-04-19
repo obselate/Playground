@@ -130,6 +130,24 @@ regex-garden/
     examples/sampler.garden
 ```
 
+## Releasing
+
+Push a tag matching `regex-garden-v<semver>` to trigger
+[`release-regex-garden.yml`](../.github/workflows/release-regex-garden.yml):
+
+```
+git tag regex-garden-v0.2.0
+git push origin regex-garden-v0.2.0
+```
+
+That builds a source tarball and a pure-Python wheel with `python -m
+build` and attaches both to the GitHub Release for that tag. Users can
+install directly from the release assets:
+
+```
+pip install https://github.com/obselate/Playground/releases/download/regex-garden-v0.2.0/regex_garden-0.2.0-py3-none-any.whl
+```
+
 ## License
 
 MIT. See the repo-root [LICENSE](../LICENSE).
