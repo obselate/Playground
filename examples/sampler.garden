@@ -1,0 +1,29 @@
+# A sampler garden.
+#
+# Each entry has a name and a pattern. Blank lines and '#' comments are
+# ignored. Patterns are taken verbatim -- backslashes are NOT interpreted
+# by the garden parser, so '\d' stays '\d'.
+
+- name: hello
+  pattern: hello
+
+- name: quantified
+  pattern: a+b
+
+- name: alternation
+  pattern: cat|dog|bird
+
+- name: char-class
+  pattern: [A-Za-z_]
+
+- name: phone
+  pattern: \d{3}-\d{4}
+
+- name: group-repeat
+  pattern: (ab)+
+
+- name: anchored
+  pattern: ^hello$
+
+- name: email-ish
+  pattern: [a-z]+@[a-z]+

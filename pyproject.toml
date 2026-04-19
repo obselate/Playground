@@ -1,0 +1,33 @@
+[project]
+name = "regex-garden"
+version = "0.1.0"
+description = "Grow ASCII plants from regular expressions."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "regex-garden contributors" }]
+keywords = ["regex", "ascii-art", "visualization", "cli", "terminal"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Artistic Software",
+    "Topic :: Software Development",
+    "Environment :: Console",
+]
+
+[project.urls]
+Repository = "https://github.com/obselate/playground"
+
+[project.scripts]
+regex-garden = "regex_garden.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
