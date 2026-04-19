@@ -190,6 +190,23 @@ cargo test
 cargo run -- --list-patterns
 ```
 
+## Releasing
+
+Push a tag matching `censor-v<semver>` to trigger
+[`release-censor.yml`](../.github/workflows/release-censor.yml):
+
+```
+git tag censor-v0.2.0
+git push origin censor-v0.2.0
+```
+
+That fans out to a 4-way matrix (Linux x86_64, macOS x86_64, macOS
+aarch64, Windows x86_64), builds a stripped release binary for each,
+bundles it with the README and LICENSE, and uploads `.tar.gz`
+(Unix) / `.zip` (Windows) archives to the GitHub Release for that tag.
+The release body is auto-populated from commits since the previous
+tag.
+
 ## License
 
 MIT.

@@ -1,0 +1,105 @@
+name: release-mile-marker
+
+# Cross-platform binary release for `mile-marker`.
+#
+# Triggered by pushing a tag matching `mile-marker-v<version>` (e.g.
+# `mile-marker-v0.2.0`). Same shape as release-censor.yml but with
+# the extra Linux system packages that eframe + xcap pull in at build
+# time (X11/Wayland/EGL/PipeWire/SPA). macOS and Windows runners get
+# what they need out of the box.
+
+on:
+  push:
+    tags:
+      - 'mile-marker-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            archive-ext: tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            archive-ext: tar.gz
+          - os: macos-13
+            target: x86_64-apple-darwin
+            archive-ext: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            archive-ext: zip
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: mile-marker
+
+      - name: install Linux system deps
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libxcb-render0-dev \
+            libxcb-shape0-dev \
+            libxcb-xfixes0-dev \
+            libxkbcommon-dev \
+            libssl-dev \
+            libdbus-1-dev \
+            libegl-dev \
+            libgbm-dev \
+            libwayland-dev \
+            libpipewire-0.3-dev \
+            libspa-0.2-dev
+
+      - name: cargo build --release
+        working-directory: mile-marker
+        run: cargo build --release --locked --target ${{ matrix.target }}
+
+      - name: stage archive
+        shell: bash
+        working-directory: mile-marker
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#mile-marker-v}"
+          name="mile-marker-${version}-${{ matrix.target }}"
+          mkdir -p "staging/${name}"
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cp "target/${{ matrix.target }}/release/mile-marker.exe" "staging/${name}/"
+          else
+            cp "target/${{ matrix.target }}/release/mile-marker" "staging/${name}/"
+          fi
+          cp README.md "staging/${name}/"
+          cp ../LICENSE "staging/${name}/"
+          # Bundle the font licence alongside the binary; the font itself
+          # is baked into the executable, but distributing its copyright
+          # file alongside keeps us honest.
+          cp assets/font.LICENSE "staging/${name}/FONT-LICENSE"
+          cd staging
+          if [[ "${{ matrix.archive-ext }}" == "zip" ]]; then
+            7z a "${name}.zip" "${name}"
+          else
+            tar czf "${name}.tar.gz" "${name}"
+          fi
+          echo "ARCHIVE_PATH=mile-marker/staging/${name}.${{ matrix.archive-ext }}" >>"$GITHUB_ENV"
+
+      - name: upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ARCHIVE_PATH }}
+          fail_on_unmatched_files: true
+          generate_release_notes: true

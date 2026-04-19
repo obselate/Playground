@@ -149,6 +149,21 @@ cargo clippy --all-targets -- -D warnings
 CI runs on Linux, macOS, and Windows; see
 `.github/workflows/mile-marker.yml`.
 
+## Releasing
+
+Push a tag matching `mile-marker-v<semver>` to trigger
+[`release-mile-marker.yml`](../.github/workflows/release-mile-marker.yml):
+
+```
+git tag mile-marker-v0.2.0
+git push origin mile-marker-v0.2.0
+```
+
+That builds a stripped release binary for Linux x86_64, macOS x86_64
+(Intel), macOS aarch64 (Apple Silicon), and Windows x86_64, bundles
+each with the README, LICENSE, and the bundled-font copyright notice,
+and uploads the archives to the GitHub Release for that tag.
+
 ## License
 
 MIT for the code. The bundled DejaVu Sans font has its own permissive
