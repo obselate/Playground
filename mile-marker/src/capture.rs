@@ -22,7 +22,10 @@ pub enum Target {
 /// uses for indexing. Returns the user-facing display name for each.
 pub fn list_monitors() -> Result<Vec<String>> {
     let monitors = Monitor::all().context("enumerating monitors")?;
-    Ok(monitors.iter().map(|m| m.name().to_string()).collect())
+    Ok(monitors
+        .iter()
+        .map(|m| m.name().unwrap_or_else(|_| "<unknown>".to_string()))
+        .collect())
 }
 
 /// Take a screenshot from the requested target.
@@ -38,7 +41,7 @@ pub fn capture(target: Target) -> Result<RgbaImage> {
     let monitor = match target {
         Target::Primary => monitors
             .into_iter()
-            .find(|m| m.is_primary())
+            .find(|m| m.is_primary().unwrap_or(false))
             .ok_or_else(|| anyhow!("no primary monitor reported"))?,
         Target::Index(i) => monitors
             .into_iter()

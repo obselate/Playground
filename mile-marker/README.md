@@ -37,12 +37,18 @@ with no external dependencies (the caption font is bundled).
 
 ### Linux dev requirements
 
-eframe and xcap pull in X11/Wayland system libraries. On Debian/Ubuntu:
+eframe and xcap pull in X11/Wayland and PipeWire system libraries. On
+Debian/Ubuntu:
 
 ```
 sudo apt install libgtk-3-dev libxcb-render0-dev libxcb-shape0-dev \
-                 libxcb-xfixes0-dev libxkbcommon-dev libssl-dev libdbus-1-dev
+                 libxcb-xfixes0-dev libxkbcommon-dev libssl-dev \
+                 libdbus-1-dev libegl-dev libgbm-dev libwayland-dev \
+                 libpipewire-0.3-dev libspa-0.2-dev
 ```
+
+(PipeWire and SPA come from xcap's Wayland screen-capture path; even on
+X11 sessions they're required at build time.)
 
 The GitHub Actions workflow installs these automatically.
 

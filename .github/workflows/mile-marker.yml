@@ -48,7 +48,12 @@ jobs:
             libxcb-xfixes0-dev \
             libxkbcommon-dev \
             libssl-dev \
-            libdbus-1-dev
+            libdbus-1-dev \
+            libegl-dev \
+            libgbm-dev \
+            libwayland-dev \
+            libpipewire-0.3-dev \
+            libspa-0.2-dev
 
       - name: cargo fmt --check
         run: cargo fmt --all -- --check

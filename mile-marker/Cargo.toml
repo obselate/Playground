@@ -34,7 +34,7 @@ image = { version = "0.25", default-features = false, features = ["png"] }
 imageproc = { version = "0.25", default-features = false }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-xcap = "0.0.13"
+xcap = "0.9"
 
 [dev-dependencies]
 tempfile = "3"
