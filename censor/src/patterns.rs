@@ -100,8 +100,11 @@ impl BuiltinPatterns {
                 "line",
                 r#"(?i)aws[_\-]?(?:secret|sk)[^=:]{0,20}[=:]\s*['"]?[A-Za-z0-9/+]{40}['"]?"#,
             ),
-            // GCP / Firebase API keys.
-            ("google-api-key", "line", r"AIza[0-9A-Za-z_\-]{35}"),
+            // GCP / Firebase API keys. Real keys are 39 chars (`AIza` + 35),
+            // but we accept 35-or-more so that truncated/padded leaks don't
+            // leave a tail of bytes outside the redaction marker. The
+            // character class still bounds the match to key-shaped chars.
+            ("google-api-key", "line", r"AIza[0-9A-Za-z_\-]{35,}"),
             // --- Source-forge / CI tokens ---
             ("github-pat", "line", r"gh[pousr]_[A-Za-z0-9]{36}"),
             (
@@ -141,9 +144,12 @@ impl BuiltinPatterns {
                 r"[a-zA-Z][a-zA-Z0-9+\-.]*://[^\s:/@]+:[^\s/@]+@[^\s]+",
             ),
             // Credit-card-shaped digit runs (13-19 digits with optional
-            // spaces or dashes). Prone to false positives on long numeric
-            // identifiers; refinements are up to the caller.
-            ("credit-card", "line", r"\b(?:\d[ -]?){13,19}\b"),
+            // spaces or dashes between them). The pattern is anchored to a
+            // digit at both ends so the trailing optional separator can't
+            // be greedily consumed (e.g. eating the space before the next
+            // word). Prone to false positives on long numeric identifiers;
+            // refinements are up to the caller.
+            ("credit-card", "line", r"\b\d(?:[ -]?\d){12,18}\b"),
             // Emails. Not secrets per se, but typically PII worth scrubbing
             // before pasting publicly.
             (
