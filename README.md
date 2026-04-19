@@ -1,146 +1,58 @@
 # Playground
 
-A little monorepo of small, original, open-source tools. Each subproject
-ships independently and is documented in its own README.
+A small monorepo of original, open-source tools. Each project is
+self-contained — it has its own README, its own build, its own tests,
+and its own CI job — and can be built, installed, and released
+independently.
 
-| Project | Language | What it does |
+## Projects
+
+| Project | Language | Summary |
 | --- | --- | --- |
-| [`regex-garden`](#regex-garden) (at the repo root under `src/`) | Python 3.10+ | Renders a regex as an ASCII plant whose shape mirrors its AST. |
-| [`censor/`](censor/README.md) | Rust | Stream-through redactor for secrets in logs, diffs, and shell output. Runs on Linux, macOS, and Windows. |
+| [`regex-garden/`](regex-garden/README.md) | Python 3.10+ | Grows each regex into a unique ASCII plant whose shape mirrors its AST. CLI + `.garden` file format. |
+| [`censor/`](censor/README.md) | Rust (edition 2021) | Stream-through redactor for secrets in logs, diffs, and shell output. Zero OS-specific code; ships as a single binary on Linux, macOS, and Windows. |
 
----
-
-# regex-garden
-
-Grow ASCII plants from regular expressions.
-
-`regex-garden` is a small CLI that reads a regex, parses it with Python's
-own `re._parser`, and renders its abstract syntax tree as a plant. Literals
-become leaves on a stem; character classes become flowers; alternation
-forks the stem; quantifiers stack the same shape multiple times. Equivalent
-regexes grow the same plant, which makes it easy to *see* structural
-patterns you would normally have to read character-by-character.
+## Layout
 
 ```
-$ regex-garden plant 'cat|dog|bird'
-
-                d-|
-                  |
-  |-t     |-g     |-r
-  |       |       |
-a-|     o-|     i-|
-  |       |       |
-  |-c     |-d     |-b
-   \      |      /
-    \     |     /
-     \    |    /
-      \   |   /
-       \  |  /
-        \ | /
-         \|/
-          |
-          |
-~~~~~~~~~~~~~~~~~~~~~
+.
+├── LICENSE               # MIT, covers everything in this repo
+├── README.md             # you are here
+├── .github/workflows/    # one workflow per project (scoped via path filters)
+├── regex-garden/
+│   ├── README.md
+│   ├── pyproject.toml
+│   ├── conftest.py
+│   ├── src/regex_garden/
+│   ├── tests/
+│   └── examples/
+└── censor/
+    ├── README.md
+    ├── Cargo.toml
+    ├── Cargo.lock
+    ├── src/
+    └── tests/
 ```
 
-It is Python 3.10+ only, zero third-party runtime dependencies, MIT
-licensed, and fits in a handful of files.
+Each subproject is the root of its own build:
 
-## Install
+- **regex-garden**: `cd regex-garden && python -m pytest` (tests), `pip install -e .` (install), `python -m regex_garden examples` (demo).
+- **censor**: `cd censor && cargo test` (tests), `cargo install --path .` (install), `cargo run -- --list-patterns` (sanity check).
 
-From a checkout:
+## CI
 
-```
-pip install -e .
-```
+GitHub Actions runs one workflow per project, each scoped by a path
+filter so a change to Python code doesn't rebuild Rust and vice versa.
+See `.github/workflows/`.
 
-Or just run it in-place without installing:
+## Adding a new project
 
-```
-python -m regex_garden examples
-```
-
-## Usage
-
-Three subcommands:
-
-```
-regex-garden plant PATTERN [--label NAME | --labels]
-regex-garden garden FILE.garden
-regex-garden examples
-```
-
-- `plant` renders a single pattern.
-- `garden` reads a `.garden` file (see `examples/sampler.garden`) and
-  renders every named pattern in order.
-- `examples` prints a built-in sampler.
-
-### A `.garden` file
-
-The format is deliberately minimal so gardens are easy to write and diff:
-
-```
-# My garden
-- name: email-ish
-  pattern: [a-z]+@[a-z]+
-
-- name: phone
-  pattern: \d{3}-\d{4}
-```
-
-Comments start with `#`, blank lines are ignored, and patterns are taken
-verbatim — backslashes stay backslashes.
-
-## Glyph vocabulary
-
-| Regex construct | Rendering |
-| --- | --- |
-| literal `a` | leaf `\|-a` (side alternates up the stem) |
-| any char `.` | `(*)` pollen puff |
-| `\d`, `\w`, `\s`, … | `(o)digit`, `(#)word`, `(~)space`, … — named flower |
-| `[abc]`, `[a-z]` | `(*){abc}` / `(*){a-z}` — flower labelled with members |
-| `[^abc]` | `(*){^abc}` — class with a thorn |
-| alternation `a\|b\|c` | V-branching stems reconverging on a single trunk |
-| group `(ab)` | sub-shoot captioned `(#n)` for group number `n` |
-| quantifier `a+` | stem labelled `(x+)`, child shape stacked (capped at 3 copies) |
-| anchors `^`, `$` | labelled banners at ground and crown |
-| lookahead `(?=…)` | marker `(?=)` above the sub-plant, joined by a dotted stem |
-
-## A known quirk: `a|b` vs `[ab]`
-
-Python's own regex parser folds single-character alternations like
-`a|b|c` into a character class `[abc]` before we ever see them. So
-`regex-garden plant 'a|b'` renders the same flower as `regex-garden plant
-'[ab]'`. This is semantically honest — the two patterns describe exactly
-the same language — but it does mean small alternations do not fork the
-stem. Use multi-character alternatives (`ab|cd`) if you want the branch.
-
-## Development
-
-```
-python -m pytest
-```
-
-The test suite lives in `tests/` and covers the canvas primitives, the
-regex-to-plant renderer, the garden parser, and the CLI. Tests assert on
-structural properties (is there a `~` ground line? does the quantifier
-label appear?) rather than full-string equality, so harmless cosmetic
-tweaks don't break them.
-
-### Repository layout
-
-```
-src/regex_garden/
-    canvas.py    # text blocks with a stem-pivot column and composition ops
-    plant.py     # regex AST -> Block renderer
-    garden.py    # parser and formatter for .garden files
-    cli.py       # argparse-based CLI
-    __main__.py  # python -m regex_garden entry point
-tests/           # pytest suite
-examples/
-    sampler.garden
-```
+1. Create a new top-level directory with its own README, build file, and
+   tests.
+2. Add a matching workflow under `.github/workflows/<project>.yml` whose
+   `paths:` filter matches that directory.
+3. Link it from the Projects table above.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
