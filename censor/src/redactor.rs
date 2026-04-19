@@ -343,4 +343,33 @@ after\n";
             "got {out}"
         );
     }
+
+    /// The Google API key regex used to be exact-length (`AIza` + 35), so
+    /// a longer fixture (or padded leak) left a tail of bytes outside the
+    /// redaction marker. We now accept 35-or-more so the marker eats the
+    /// whole alphanumeric run.
+    #[test]
+    fn google_api_key_eats_extra_tail_chars() {
+        let input = "GOOGLE_MAPS_KEY=AIzaSyD9bXYZabcdefghijklmnOpQrStUvWxYzAbCd\n";
+        let (out, _) = run_default(input);
+        assert!(out.contains("<REDACTED:google-api-key>"), "got {out}");
+        // None of the alphabet chars from the original key may survive.
+        assert!(!out.contains("AIza"), "AIza prefix leaked: {out}");
+        assert!(!out.contains("AbCd"), "tail chars leaked: {out}");
+    }
+
+    /// The credit-card regex used to allow the optional space/dash to be
+    /// the LAST character of the match, which ate the separator before the
+    /// next word ("4242 4242 4242 4242 charged" -> "<...>charged"). The
+    /// fix anchors the match to a digit at both ends.
+    #[test]
+    fn credit_card_match_does_not_eat_trailing_space() {
+        let input = "card: 4242 4242 4242 4242 charged\n";
+        let (out, _) = run_default(input);
+        assert!(out.contains("<REDACTED:credit-card>"), "got {out}");
+        assert!(
+            out.contains("> charged"),
+            "trailing separator was eaten: {out:?}"
+        );
+    }
 }
